@@ -110,9 +110,14 @@ echo  [4/4] Updating Windows hosts file for hotspot DNS...
 set HOSTS=%SystemRoot%\System32\drivers\etc\hosts
 copy /Y "%HOSTS%" "%HOSTS%.bak.oogi" >nul 2>&1
 
-:: Remove any previous OogiCam QA entries
+:: Remove ALL previous entries for these hostnames (any IP, any comment style)
+set HOSTS_DOMAINS=api.oogiservices.net storage.oogiservices.net streaming.oogiservices.net streaming-za.oogiservices.net metrics.oogiservices.net synap-iot-production.azure-devices.net staging-synapinc-iothub.azure-devices.net
 findstr /V /C:"# OogiCam-QA" "%HOSTS%" > "%HOSTS%.tmp" 2>nul
 move /Y "%HOSTS%.tmp" "%HOSTS%" >nul 2>&1
+for %%D in (%HOSTS_DOMAINS%) do (
+    findstr /V /C:"%%D" "%HOSTS%" > "%HOSTS%.tmp" 2>nul
+    move /Y "%HOSTS%.tmp" "%HOSTS%" >nul 2>&1
+)
 
 :: Add new entries
 (
