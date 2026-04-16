@@ -27,8 +27,15 @@ if exist "%NGINX_DIR%\nginx.exe" (
     echo        nginx not found, skipping.
 )
 
+:: ── Remove firewall rules ────────────────────────────────
+echo  [2/4] Removing firewall rules...
+netsh advfirewall firewall delete rule name="OogiCam-QA 443"  >nul 2>&1
+netsh advfirewall firewall delete rule name="OogiCam-QA 8883" >nul 2>&1
+netsh advfirewall firewall delete rule name="OogiCam-QA 1433" >nul 2>&1
+echo        Firewall rules removed.
+
 :: ── Remove hosts entries ─────────────────────────────────
-echo  [2/3] Removing hosts file entries...
+echo  [3/4] Removing hosts file entries...
 set HOSTS=%SystemRoot%\System32\drivers\etc\hosts
 findstr /V /C:"# OogiCam-QA" "%HOSTS%" > "%HOSTS%.tmp" 2>nul
 move /Y "%HOSTS%.tmp" "%HOSTS%" >nul 2>&1
@@ -36,7 +43,7 @@ ipconfig /flushdns >nul 2>&1
 echo        Hosts file cleaned and DNS flushed.
 
 :: ── Restore backup ───────────────────────────────────────
-echo  [3/3] Hosts file backup available at:
+echo  [4/4] Hosts file backup available at:
 echo        %HOSTS%.bak.oogi
 echo.
 

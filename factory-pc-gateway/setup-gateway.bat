@@ -103,6 +103,16 @@ cd /d "%NGINX_DIR%"
 start /B nginx.exe
 echo        nginx started on %HOTSPOT_IP% ^(443, 8883, 1433^).
 
+:: ── Step 3b: Open Windows Firewall ports ─────────────────
+echo        Opening firewall ports for nginx...
+netsh advfirewall firewall delete rule name="OogiCam-QA 443"  >nul 2>&1
+netsh advfirewall firewall delete rule name="OogiCam-QA 8883" >nul 2>&1
+netsh advfirewall firewall delete rule name="OogiCam-QA 1433" >nul 2>&1
+netsh advfirewall firewall add rule name="OogiCam-QA 443"  dir=in action=allow protocol=tcp localport=443  >nul 2>&1
+netsh advfirewall firewall add rule name="OogiCam-QA 8883" dir=in action=allow protocol=tcp localport=8883 >nul 2>&1
+netsh advfirewall firewall add rule name="OogiCam-QA 1433" dir=in action=allow protocol=tcp localport=1433 >nul 2>&1
+echo        Firewall rules added.
+
 :: ── Step 4: Configure Windows DNS ────────────────────────
 echo  [4/4] Updating Windows hosts file for hotspot DNS...
 
