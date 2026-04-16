@@ -34,6 +34,12 @@ echo  Hotspot gateway IP   : %HOTSPOT_IP%
 echo  nginx directory      : %NGINX_DIR%
 echo.
 
+:: ── Step 0: Keep Mobile Hotspot always on ────────────────
+echo  [0/4] Disabling Mobile Hotspot auto-off...
+powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\icssvc\Settings' -Name 'PeerlessTimeoutEnabled' -Value 0 -ErrorAction SilentlyContinue"
+echo        Done. Hotspot will no longer turn off when no devices are connected.
+echo.
+
 :: ── Step 1: Check VPN ────────────────────────────────────
 echo  [1/4] Checking Alibaba VPN connection...
 ipconfig | findstr /C:"172.16.100." >nul 2>&1
