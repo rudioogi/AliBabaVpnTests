@@ -36,8 +36,14 @@ echo.
 
 :: ── Step 0: Keep Mobile Hotspot always on ────────────────
 echo  [0/4] Disabling Mobile Hotspot auto-off...
+
+:: Disable auto-off when no devices connected
 powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\icssvc\Settings' -Name 'PeerlessTimeoutEnabled' -Value 0 -ErrorAction SilentlyContinue"
-echo        Done. Hotspot will no longer turn off when no devices are connected.
+
+:: Disable Windows power management on the Wi-Fi adapter
+powershell -Command "$a = Get-NetAdapter | Where-Object { $_.Name -like '*Wi-Fi*' -or $_.InterfaceDescription -like '*Wireless*' } | Select-Object -First 1; if ($a) { Set-NetAdapterPowerManagement -Name $a.Name -AllowComputerToTurnOffDevice Disabled -ErrorAction SilentlyContinue; Write-Host '       Wi-Fi power management disabled on:' $a.Name } else { Write-Host '       [WARN] Wi-Fi adapter not found' }"
+
+echo        Hotspot keep-alive settings applied.
 echo.
 
 :: ── Step 1: Check VPN ────────────────────────────────────
