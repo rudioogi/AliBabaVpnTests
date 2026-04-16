@@ -110,14 +110,8 @@ echo  [4/4] Updating Windows hosts file for hotspot DNS...
 set HOSTS=%SystemRoot%\System32\drivers\etc\hosts
 copy /Y "%HOSTS%" "%HOSTS%.bak.oogi" >nul 2>&1
 
-:: Remove ALL previous entries for these hostnames (any IP, any comment style)
-set HOSTS_DOMAINS=api.oogiservices.net storage.oogiservices.net streaming.oogiservices.net streaming-za.oogiservices.net metrics.oogiservices.net synap-iot-production.azure-devices.net staging-synapinc-iothub.azure-devices.net
-findstr /V /C:"# OogiCam-QA" "%HOSTS%" > "%HOSTS%.tmp" 2>nul
-move /Y "%HOSTS%.tmp" "%HOSTS%" >nul 2>&1
-for %%D in (%HOSTS_DOMAINS%) do (
-    findstr /V /C:"%%D" "%HOSTS%" > "%HOSTS%.tmp" 2>nul
-    move /Y "%HOSTS%.tmp" "%HOSTS%" >nul 2>&1
-)
+:: Comment out any existing entries for these hostnames (preserves old IPs for reference)
+powershell -Command "$hosts = '%HOSTS%'.Replace('\', '\\'); $domains = @('api.oogiservices.net','storage.oogiservices.net','streaming.oogiservices.net','streaming-za.oogiservices.net','metrics.oogiservices.net','synap-iot-production.azure-devices.net','staging-synapinc-iothub.azure-devices.net'); $lines = Get-Content $hosts; $updated = $lines | ForEach-Object { $l = $_; $match = $domains | Where-Object { $l -match $_ -and -not $l.TrimStart().StartsWith('#') -and $l -notmatch '# OogiCam-QA' }; if ($match) { '# ' + $l } else { $l } }; $updated | Set-Content $hosts"
 
 :: Add new entries
 (
