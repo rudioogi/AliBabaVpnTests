@@ -155,8 +155,8 @@ echo  [5/6] Updating Windows hosts file...
 set HOSTS=%SystemRoot%\System32\drivers\etc\hosts
 copy /Y "%HOSTS%" "%HOSTS%.bak.oogi" >nul 2>&1
 
-:: Comment out any existing OogiCam-related entries
-powershell -Command "$hosts = '%HOSTS%'.Replace('\', '\\'); $domains = @('api.oogiservices.net','storage.oogiservices.net','streaming.oogiservices.net','streaming-za.oogiservices.net','metrics.oogiservices.net','synap-iot-production.azure-devices.net','staging-synapinc-iothub.azure-devices.net','connectivitycheck.gstatic.com'); $lines = Get-Content $hosts; $updated = $lines | ForEach-Object { $l = $_; $match = $domains | Where-Object { $l -match $_ -and -not $l.TrimStart().StartsWith('#') -and $l -notmatch '# OogiCam-QA' }; if ($match) { '# ' + $l } else { $l } }; $updated | Set-Content $hosts"
+:: Comment out any existing OogiCam-related entries (write to temp then move)
+powershell -Command "$hosts = '%HOSTS%'.Replace('\', '\\'); $tmp = $hosts + '.oogi_tmp'; $domains = @('api.oogiservices.net','storage.oogiservices.net','streaming.oogiservices.net','streaming-za.oogiservices.net','metrics.oogiservices.net','synap-iot-production.azure-devices.net','staging-synapinc-iothub.azure-devices.net','connectivitycheck.gstatic.com'); $lines = [System.IO.File]::ReadAllLines($hosts); $updated = $lines | ForEach-Object { $l = $_; $match = $domains | Where-Object { $l -match $_ -and -not $l.TrimStart().StartsWith('#') -and $l -notmatch '# OogiCam-QA' }; if ($match) { '# ' + $l } else { $l } }; [System.IO.File]::WriteAllLines($tmp, $updated); Move-Item -Force $tmp $hosts"
 
 (
 echo.
