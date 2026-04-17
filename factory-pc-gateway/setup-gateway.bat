@@ -46,12 +46,10 @@ powershell -Command "$a = Get-NetAdapter | Where-Object { $_.Name -like '*Wi-Fi*
 echo        Hotspot keep-alive settings applied.
 echo.
 
-:: ── Step 0b: Restart ICS (SharedAccess) for clean DHCP ──
-echo  [0b]  Restarting ICS service for clean DHCP state...
-net stop SharedAccess >nul 2>&1
-timeout /t 1 /nobreak >nul
-net start SharedAccess >nul 2>&1
-echo        ICS service restarted.
+:: ── Step 0b: Set hotspot adapter to Private network profile ──
+echo  [0b]  Setting hotspot adapter network profile to Private...
+:: Public profile blocks DHCP responses to connected Android devices
+powershell -Command "$a = Get-NetIPAddress -IPAddress 192.168.137.1 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty InterfaceAlias; if ($a) { Set-NetConnectionProfile -InterfaceAlias $a -NetworkCategory Private -ErrorAction SilentlyContinue; Write-Host '       Set to Private:' $a } else { Write-Host '       [WARN] Hotspot adapter not found — enable Mobile Hotspot first, then re-run' }"
 echo.
 
 :: ── Step 1: Check VPN ────────────────────────────────────

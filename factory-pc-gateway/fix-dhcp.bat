@@ -16,12 +16,9 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-:: ── Step 1: Restart ICS (SharedAccess) ───────────────────
-echo  [1/3] Restarting ICS service ^(DHCP for hotspot clients^)...
-net stop SharedAccess >nul 2>&1
-timeout /t 2 /nobreak >nul
-net start SharedAccess >nul 2>&1
-echo        ICS restarted.
+:: ── Step 1: Set hotspot adapter to Private ───────────────
+echo  [1/3] Setting hotspot adapter to Private network profile...
+powershell -Command "$a = Get-NetIPAddress -IPAddress 192.168.137.1 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty InterfaceAlias; if ($a) { Set-NetConnectionProfile -InterfaceAlias $a -NetworkCategory Private -ErrorAction SilentlyContinue; Write-Host '       Set to Private:' $a } else { Write-Host '       [WARN] Hotspot adapter not found — is Mobile Hotspot enabled?' }"
 echo.
 
 :: ── Step 2: Re-open DHCP + DNS firewall rules ─────────────
