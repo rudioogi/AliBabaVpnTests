@@ -104,6 +104,13 @@ echo         listen %HOTSPOT_IP%:1433;
 echo         proxy_pass %CHINA_ECS_IP%:1433;
 echo         proxy_connect_timeout 10s;
 echo     }
+echo.
+echo     # Prometheus remote-write ^(metrics^)
+echo     server {
+echo         listen %HOTSPOT_IP%:5090;
+echo         proxy_pass %CHINA_ECS_IP%:5090;
+echo         proxy_connect_timeout 10s;
+echo     }
 echo }
 ) > "%NGINX_DIR%\conf\nginx.conf"
 echo        nginx.conf generated.
@@ -128,9 +135,11 @@ echo  [4/5] Opening firewall ports...
 netsh advfirewall firewall delete rule name="OogiCam-QA 443"  >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 8883" >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 1433" >nul 2>&1
+netsh advfirewall firewall delete rule name="OogiCam-QA 5090" >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 443"  dir=in action=allow protocol=tcp localport=443  >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 8883" dir=in action=allow protocol=tcp localport=8883 >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 1433" dir=in action=allow protocol=tcp localport=1433 >nul 2>&1
+netsh advfirewall firewall add rule name="OogiCam-QA 5090" dir=in action=allow protocol=tcp localport=5090 >nul 2>&1
 
 :: UDP ports for DHCP (Android devices getting IP address from hotspot)
 netsh advfirewall firewall delete rule name="OogiCam-QA DHCP" >nul 2>&1
