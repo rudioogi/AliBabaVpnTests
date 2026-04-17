@@ -105,10 +105,10 @@ echo         proxy_pass %CHINA_ECS_IP%:1433;
 echo         proxy_connect_timeout 10s;
 echo     }
 echo.
-echo     # Prometheus remote-write ^(metrics^)
+echo     # Metrics ^(InfluxDB HTTP API^)
 echo     server {
-echo         listen %HOTSPOT_IP%:5090;
-echo         proxy_pass %CHINA_ECS_IP%:5090;
+echo         listen %HOTSPOT_IP%:8086;
+echo         proxy_pass %CHINA_ECS_IP%:8086;
 echo         proxy_connect_timeout 10s;
 echo     }
 echo }
@@ -126,7 +126,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 cd /d "%NGINX_DIR%"
 start /B nginx.exe
-echo        nginx started on %HOTSPOT_IP% ^(443, 8883, 1433^).
+echo        nginx started on %HOTSPOT_IP% ^(443, 8883, 1433, 8086^).
 
 :: ── Step 3b: Open Windows Firewall ports ─────────────────
 echo  [4/5] Opening firewall ports...
@@ -135,11 +135,11 @@ echo  [4/5] Opening firewall ports...
 netsh advfirewall firewall delete rule name="OogiCam-QA 443"  >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 8883" >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 1433" >nul 2>&1
-netsh advfirewall firewall delete rule name="OogiCam-QA 5090" >nul 2>&1
+netsh advfirewall firewall delete rule name="OogiCam-QA 8086" >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 443"  dir=in action=allow protocol=tcp localport=443  >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 8883" dir=in action=allow protocol=tcp localport=8883 >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 1433" dir=in action=allow protocol=tcp localport=1433 >nul 2>&1
-netsh advfirewall firewall add rule name="OogiCam-QA 5090" dir=in action=allow protocol=tcp localport=5090 >nul 2>&1
+netsh advfirewall firewall add rule name="OogiCam-QA 8086" dir=in action=allow protocol=tcp localport=8086 >nul 2>&1
 
 :: UDP ports for DHCP (Android devices getting IP address from hotspot)
 netsh advfirewall firewall delete rule name="OogiCam-QA DHCP" >nul 2>&1
@@ -149,7 +149,7 @@ netsh advfirewall firewall add rule name="OogiCam-QA DHCP" dir=in action=allow p
 netsh advfirewall firewall delete rule name="OogiCam-QA DNS" >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA DNS" dir=in action=allow protocol=udp localport=53 >nul 2>&1
 
-echo        Firewall rules added ^(TCP 443/8883/1433, UDP 67/53^).
+echo        Firewall rules added ^(TCP 443/8883/1433/8086, UDP 67/53^).
 
 :: ── Step 5: Configure Windows DNS ────────────────────────
 echo  [5/5] Updating Windows hosts file for hotspot DNS...

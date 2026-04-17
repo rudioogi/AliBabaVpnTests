@@ -32,7 +32,7 @@ echo  [2/4] Removing firewall rules...
 netsh advfirewall firewall delete rule name="OogiCam-QA 443"  >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 8883" >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 1433" >nul 2>&1
-netsh advfirewall firewall delete rule name="OogiCam-QA 5090" >nul 2>&1
+netsh advfirewall firewall delete rule name="OogiCam-QA 8086" >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA DHCP" >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA DNS"  >nul 2>&1
 echo        Firewall rules removed.
