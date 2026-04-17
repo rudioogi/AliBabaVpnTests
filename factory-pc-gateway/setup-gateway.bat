@@ -35,7 +35,7 @@ echo  nginx directory      : %NGINX_DIR%
 echo.
 
 :: ── Step 0: Keep Mobile Hotspot always on ────────────────
-echo  [0/4] Disabling Mobile Hotspot auto-off...
+echo  [0/5] Disabling Mobile Hotspot auto-off...
 
 :: Disable auto-off when no devices connected
 powershell -Command "Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\icssvc\Settings' -Name 'PeerlessTimeoutEnabled' -Value 0 -ErrorAction SilentlyContinue"
@@ -46,8 +46,16 @@ powershell -Command "$a = Get-NetAdapter | Where-Object { $_.Name -like '*Wi-Fi*
 echo        Hotspot keep-alive settings applied.
 echo.
 
+:: ── Step 0b: Restart ICS (SharedAccess) for clean DHCP ──
+echo  [0b]  Restarting ICS service for clean DHCP state...
+net stop SharedAccess >nul 2>&1
+timeout /t 1 /nobreak >nul
+net start SharedAccess >nul 2>&1
+echo        ICS service restarted.
+echo.
+
 :: ── Step 1: Check VPN ────────────────────────────────────
-echo  [1/4] Checking Alibaba VPN connection...
+echo  [1/5] Checking Alibaba VPN connection...
 ipconfig | findstr /C:"172.16.100." >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
     echo        [WARN] No VPN IP detected ^(172.16.100.x^).
@@ -59,7 +67,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 :: ── Step 2: Generate nginx config ────────────────────────
-echo  [2/4] Generating nginx config...
+echo  [2/5] Generating nginx config...
 if not exist "%NGINX_DIR%" (
     echo        [ERROR] nginx not found at %NGINX_DIR%
     echo        Download nginx for Windows from nginx.org/en/download.html
@@ -103,7 +111,7 @@ echo }
 echo        nginx.conf generated.
 
 :: ── Step 3: Start nginx ──────────────────────────────────
-echo  [3/4] Starting nginx...
+echo  [3/5] Starting nginx...
 tasklist /FI "IMAGENAME eq nginx.exe" 2>nul | findstr /I "nginx.exe" >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
     echo        Stopping existing nginx...
@@ -116,17 +124,28 @@ start /B nginx.exe
 echo        nginx started on %HOTSPOT_IP% ^(443, 8883, 1433^).
 
 :: ── Step 3b: Open Windows Firewall ports ─────────────────
-echo        Opening firewall ports for nginx...
+echo  [4/5] Opening firewall ports...
+
+:: TCP ports for nginx proxy
 netsh advfirewall firewall delete rule name="OogiCam-QA 443"  >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 8883" >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 1433" >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 443"  dir=in action=allow protocol=tcp localport=443  >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 8883" dir=in action=allow protocol=tcp localport=8883 >nul 2>&1
 netsh advfirewall firewall add rule name="OogiCam-QA 1433" dir=in action=allow protocol=tcp localport=1433 >nul 2>&1
-echo        Firewall rules added.
 
-:: ── Step 4: Configure Windows DNS ────────────────────────
-echo  [4/4] Updating Windows hosts file for hotspot DNS...
+:: UDP ports for DHCP (Android devices getting IP address from hotspot)
+netsh advfirewall firewall delete rule name="OogiCam-QA DHCP" >nul 2>&1
+netsh advfirewall firewall add rule name="OogiCam-QA DHCP" dir=in action=allow protocol=udp localport=67 >nul 2>&1
+
+:: UDP port 53 for DNS queries from hotspot clients
+netsh advfirewall firewall delete rule name="OogiCam-QA DNS" >nul 2>&1
+netsh advfirewall firewall add rule name="OogiCam-QA DNS" dir=in action=allow protocol=udp localport=53 >nul 2>&1
+
+echo        Firewall rules added ^(TCP 443/8883/1433, UDP 67/53^).
+
+:: ── Step 5: Configure Windows DNS ────────────────────────
+echo  [5/5] Updating Windows hosts file for hotspot DNS...
 
 :: Back up hosts file
 set HOSTS=%SystemRoot%\System32\drivers\etc\hosts
@@ -160,6 +179,10 @@ echo    1. Enable Windows Mobile Hotspot
 echo       ^(Settings ^> Network ^> Mobile Hotspot^)
 echo    2. Connect your Android device to the hotspot WiFi
 echo    3. The device will use this PC as DNS + proxy
+echo.
+echo  If Android devices get stuck at "Obtaining IP address":
+echo    - Run fix-dhcp.bat  ^(resets ICS DHCP without full re-setup^)
+echo    - Or disable/re-enable Mobile Hotspot in Settings
 echo.
 echo  To verify, run:  verify-gateway.bat
 echo  To stop, run:    teardown-gateway.bat
