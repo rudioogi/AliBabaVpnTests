@@ -16,19 +16,12 @@ if %ERRORLEVEL% NEQ 0 (
 
 :: ── Stop nginx ───────────────────────────────────────────
 echo  [1/3] Stopping nginx...
-set NGINX_DIR=%~dp0nginx
-if exist "%NGINX_DIR%\nginx.exe" (
-    cd /d "%NGINX_DIR%"
-    nginx.exe -s quit 2>nul
-    timeout /t 2 /nobreak >nul
-    taskkill /F /IM nginx.exe >nul 2>&1
-    echo        nginx stopped.
-) else (
-    echo        nginx not found, skipping.
-)
+taskkill /F /IM nginx.exe >nul 2>&1
+echo        nginx stopped.
 
 :: ── Remove firewall rules ────────────────────────────────
 echo  [2/4] Removing firewall rules...
+netsh advfirewall firewall delete rule name="OogiCam-QA 80"   >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 443"  >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 8883" >nul 2>&1
 netsh advfirewall firewall delete rule name="OogiCam-QA 1433" >nul 2>&1
