@@ -12,11 +12,11 @@
 
 # ── IPsec Profile (Phase 1 / IKE) ────────────────────────
 /ip ipsec profile
-add name=alibaba-ike enc-algorithm=aes-128 auth-algorithm=sha1 dh-group=modp1024 lifetime=24h nat-traversal=yes
+add name=alibaba-ike enc-algorithm=aes-128 auth-algorithm=sha1 dh-group=modp1024 lifetime=24h
 
 # ── IPsec Peer ────────────────────────────────────────────
 /ip ipsec peer
-add name=alibaba-peer address=39.108.115.199/32 profile=alibaba-ike exchange-mode=ike2
+add name=alibaba-peer address=39.108.115.199/32 profile=alibaba-ike exchange-mode=ike2 nat-traversal=yes
 
 # ── IPsec Identity (pre-shared key) ──────────────────────
 /ip ipsec identity
