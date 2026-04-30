@@ -1,0 +1,21 @@
+[Unit]
+Description=Oogi VPN IP Updater
+After=network.target
+
+[Service]
+Type=simple
+User=vpn-updater
+Group=vpn-updater
+WorkingDirectory=/opt/oogi-vpn-updater
+EnvironmentFile=/etc/oogi-vpn-updater/credentials
+ExecStart=/opt/oogi-vpn-updater/venv/bin/gunicorn \
+    --bind 127.0.0.1:5000 \
+    --workers 1 \
+    --access-logfile - \
+    --error-logfile - \
+    app:app
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
