@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb logcat *)",
+      "Bash(adb shell *)",
+      "Bash(wait)",
+      "Bash(az --version)",
+      "Bash(az account *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
+    ]
+  }
+}
